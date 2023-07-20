@@ -2,16 +2,17 @@ import "dotenv/config";
 import express, {NextFunction, Request, Response} from "express";
 import {Error} from "mongoose";
 import notesRouter from "./routes/api/notes";
-const app = express();
+import morgan from "morgan";
 
+const app = express();
+app.use(morgan("dev"));
 app.use(express.json());
-app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log("url: " + req.originalUrl);
-    console.log("method: " + req.method + "\n");
-    next();
-});
 
 app.use("/api/notes", notesRouter);
+
+app.use((req, res, next) => {
+    next(new Error("Not found"));
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
