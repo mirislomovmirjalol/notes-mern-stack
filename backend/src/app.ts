@@ -3,8 +3,18 @@ import express, {NextFunction, Request, Response} from "express";
 import notesRouter from "./routes/api/notes";
 import morgan from "morgan";
 import createHttpError, {isHttpError} from "http-errors";
+import cors from "cors";
+import env from "./util/validateEnv";
 
 const app = express();
+
+const corsOptions = {
+    origin: env.FRONTEND_URL,
+    optionsSuccessStatus: 200
+}
+
+
+app.use(cors(corsOptions));
 app.use(morgan("dev"));
 app.use(express.json());
 
