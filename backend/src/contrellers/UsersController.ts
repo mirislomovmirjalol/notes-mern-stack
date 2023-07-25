@@ -3,6 +3,20 @@ import createHttpError from "http-errors";
 import bcrypt from "bcrypt";
 import UserModel from "../models/User";
 
+export const getAuthUser: RequestHandler = async (req, res, next) => {
+    const authUserId = req.session.userId;
+    try {
+        if (!authUserId) {
+            throw createHttpError(401, "Not authenticated");
+        }
+
+        const user = await UserModel.findById(authUserId).select("-password").exec();
+        res.status(200).json(user);
+    } catch (e) {
+        next(e);
+    }
+}
+
 interface SignupRequest {
     username?: string;
     password?: string;
@@ -70,6 +84,19 @@ export const login: RequestHandler<unknown, unknown, LoginRequest, unknown> = as
 
         req.session.userId = user._id;
         res.status(200).json(user);
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const logout: RequestHandler = async (req, res, next) => {
+    try {
+        req.session.destroy((err) => {
+            if (err) {
+                throw createHttpError(500, "Session could not be destroyed");
+            }
+        });
+        res.status(200).json({message: "Logout successful"});
     } catch (e) {
         next(e);
     }
